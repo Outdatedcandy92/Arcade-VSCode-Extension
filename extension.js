@@ -4,11 +4,30 @@ const fetch = import('node-fetch').then(module => module.default);
 const { apikey } = require('./config.js');
 const slackId = 'U079HV9PTC7';
 
-
+function showMessage(message){
+    vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          cancellable: false,
+        },
+        async (progress) => {
+          return new Promise((resolve) => {
+            for (let i = 1; i <= 100; i++) {
+              setTimeout(() => {
+                progress.report({ increment: 1, message: `${message}` });
+                if (i === 100) {
+                  resolve();
+                }
+              }, i * 50); // Adjust the delay for each iteration
+            }
+          });
+        }
+      );
+}
 
 
 function activate(context) {
-    let disposable = vscode.commands.registerCommand('arcade.Test', async function () {
+    let Time = vscode.commands.registerCommand('arcade.Time', async function () {
 
         const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
         try {
@@ -60,8 +79,15 @@ function activate(context) {
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
 
         const StartURL = `https://hackhour.hackclub.com/api/start/${slackId}`;
-        const workDescription = { work: "something" };
+        
+        const userCommand = await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        if (!userCommand) {
+            vscode.window.showInformationMessage('Empty Title');
+            return; // Exit if no command was entered
+        }
+        
 
+        const workDescription = { work: `${userCommand}` };
         try {
             const response = await (await fetch)(StartURL, {
                 method: 'POST', // Specify the method
@@ -77,9 +103,8 @@ function activate(context) {
                 console.log(response);
             }
 
-            // Handle the response data
-            const data = await response.json();
-            vscode.window.showInformationMessage('Session started successfully!');
+            showMessage(`Session started: ${userCommand}`);
+
         } catch (error) {
             console.error('Error starting session: ', error);
             vscode.window.showErrorMessage('Failed to start the session.');
@@ -105,14 +130,61 @@ function activate(context) {
 
             // Handle the response data
             const data = await response.json();
-            vscode.window.showInformationMessage('Session ended successfully!');
+            showMessage('Session ended successfully!');
         } catch (error) {
             console.error('Error starting session: ', error);
             vscode.window.showErrorMessage('Failed to end the session.');
         }
     });
+    let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
 
-    context.subscriptions.push(disposable, StartCommand, StopCommand);
+        const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
+
+        try {
+            const response = await (await fetch)(StartURL, {
+                method: 'POST', // Specify the method
+                headers: {
+                    'Authorization': `Bearer ${apikey}`,
+                    'Content-Type': 'application/json' // Specify the content type
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+                console.log(response);
+            }
+
+            // Handle the response data
+            const data = await response.json();
+            showMessage('Session paused successfully!');
+        } catch (error) {
+            console.error('Error starting session: ', error);
+            vscode.window.showErrorMessage('Failed to end the session.');
+        }
+    });
+    let Test = vscode.commands.registerCommand('arcade.Test', async () => {
+        vscode.window.withProgress(
+            {
+              location: vscode.ProgressLocation.Notification,
+              cancellable: false,
+            },
+            async (progress) => {
+              return new Promise((resolve) => {
+                for (let i = 1; i <= 100; i++) {
+                  setTimeout(() => {
+                    progress.report({ increment: 1, message: ` Started Session:` });
+                    if (i === 100) {
+                      resolve();
+                    }
+                  }, i * 50); // Adjust the delay for each iteration
+                }
+              });
+            }
+          );
+    
+    });
+
+    context.subscriptions.push(Time, StartCommand, StopCommand, PauseCommand, Test);
 }
 
 exports.activate = activate;

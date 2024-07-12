@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "arcade.Test",
-        "title": "Arcade: Test"
+        "command": "arcade.Time",
+        "title": "Arcade: Time"
         
       },
       {
@@ -25,6 +25,14 @@
       {
         "command": "arcade.Stop",
         "title": "Arcade: Stop"
+      },
+      {
+        "command": "arcade.Pause",
+        "title": "Arcade: Pause"
+      },
+      {
+        "command": "arcade.Test",
+        "title": "Arcade: Test"
       }
     ]
   },
