@@ -16,6 +16,15 @@
       {
         "command": "arcade.Test",
         "title": "Arcade: Test"
+        
+      },
+      {
+        "command": "arcade.Start",
+        "title": "Arcade: Start"
+      },
+      {
+        "command": "arcade.Stop",
+        "title": "Arcade: Stop"
       }
     ]
   },

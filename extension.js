@@ -3,14 +3,14 @@ const fetch = import('node-fetch').then(module => module.default);
 
 const { apikey } = require('./config.js');
 const slackId = 'U079HV9PTC7';
-const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
+
 
 
 
 function activate(context) {
     let disposable = vscode.commands.registerCommand('arcade.Test', async function () {
 
-
+        const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
         try {
             const response = await (await fetch)(url, {
                 method: 'GET',
@@ -57,8 +57,62 @@ function activate(context) {
             vscode.window.showErrorMessage('Failed to ping the API.');
         }
     });
+    let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
 
-    context.subscriptions.push(disposable);
+        const StartURL = `https://hackhour.hackclub.com/api/start/${slackId}`;
+        const workDescription = { work: "something" };
+
+        try {
+            const response = await (await fetch)(StartURL, {
+                method: 'POST', // Specify the method
+                headers: {
+                    'Authorization': `Bearer ${apikey}`,
+                    'Content-Type': 'application/json' // Specify the content type
+                },
+                body: JSON.stringify(workDescription) 
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+                console.log(response);
+            }
+
+            // Handle the response data
+            const data = await response.json();
+            vscode.window.showInformationMessage('Session started successfully!');
+        } catch (error) {
+            console.error('Error starting session: ', error);
+            vscode.window.showErrorMessage('Failed to start the session.');
+        }
+    });
+    let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
+
+        const StartURL = `https://hackhour.hackclub.com/api/cancel/${slackId}`;
+
+        try {
+            const response = await (await fetch)(StartURL, {
+                method: 'POST', // Specify the method
+                headers: {
+                    'Authorization': `Bearer ${apikey}`,
+                    'Content-Type': 'application/json' // Specify the content type
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+                console.log(response);
+            }
+
+            // Handle the response data
+            const data = await response.json();
+            vscode.window.showInformationMessage('Session ended successfully!');
+        } catch (error) {
+            console.error('Error starting session: ', error);
+            vscode.window.showErrorMessage('Failed to end the session.');
+        }
+    });
+
+    context.subscriptions.push(disposable, StartCommand, StopCommand);
 }
 
 exports.activate = activate;
