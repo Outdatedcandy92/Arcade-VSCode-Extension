@@ -1,12 +1,15 @@
 const vscode = require('vscode');
 const fetch = import('node-fetch').then(module => module.default);
-const apikey = '7e533031-4076-4716-949b-81ba3b6a8216';
+
+const { apikey } = require('./config');
+const slackId = 'U079HV9PTC7';
+const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
+
+
 
 function activate(context) {
-    let disposable = vscode.commands.registerCommand('something.helloWorld', async function () {
-        // Replace ':slackId' with the actual slackId you want to use
-        const slackId = 'U079HV9PTC7';
-        const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
+    let disposable = vscode.commands.registerCommand('arcade.Test', async function () {
+
 
         try {
             const response = await (await fetch)(url, {
@@ -22,10 +25,30 @@ function activate(context) {
 
             const data = await response.json();
             console.log(data); // Or handle the data as needed
-
+            
+            const remainingTime = data.data.remaining;
+            console.log(remainingTime);
             // Optionally display a success message in the status bar
-            vscode.window.setStatusBarMessage('Successfully pinged the API!', 5000);
-            vscode.window.showInformationMessage(JSON.stringify(data));
+            vscode.window.setStatusBarMessage(`${remainingTime} Minutes`);
+			vscode.window.showInformationMessage(`${remainingTime} minutes remaining`);
+			const remainingTimeMs = remainingTime * 60 * 1000; // Convert minutes to milliseconds
+			let remainingTimeInMinutes = remainingTime; // Assuming remainingTime is in minutes
+
+			const countdownInterval = setInterval(() => {
+				remainingTimeInMinutes -= 1;
+				console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
+				vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+
+				if (remainingTimeInMinutes <= 0) {
+					clearInterval(countdownInterval);
+					console.log('Timer ended');
+					vscode.window.showInformationMessage('The timer has ended.');
+				}
+			}, 60000); // 60000 milliseconds = 1 minute
+
+
+			
+
         } catch (error) {
             console.error('Error fetching data: ', error);
             vscode.window.showErrorMessage('Failed to ping the API.');

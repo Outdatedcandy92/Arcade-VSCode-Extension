@@ -1,7 +1,7 @@
 {
-  "name": "something",
-  "displayName": "something",
-  "description": "something",
+  "name": "arcade",
+  "displayName": "Arcade",
+  "description": "Vscode Extension for interacting with hackhour api",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.91.0"
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "something.helloWorld",
-        "title": "Hello World"
+        "command": "arcade.Test",
+        "title": "Arcade: Test"
       }
     ]
   },
