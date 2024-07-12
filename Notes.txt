@@ -1,0 +1,12 @@
+
+
+- Be abel to start and stop a session
+- Button on status bar to start/stop/pause session?
+
+
+- Display timer in status bar
+
+- show notification every 10 minutes?
+- notifiction when new session starts
+- noti when session ends
+

@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const fetch = import('node-fetch').then(module => module.default);
 
-const { apikey } = require('./config');
+const { apikey } = require('./config.js');
 const slackId = 'U079HV9PTC7';
 const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
 
@@ -29,8 +29,11 @@ function activate(context) {
             const remainingTime = data.data.remaining;
             console.log(remainingTime);
             // Optionally display a success message in the status bar
-            vscode.window.setStatusBarMessage(`${remainingTime} Minutes`);
-			vscode.window.showInformationMessage(`${remainingTime} minutes remaining`);
+            vscode.window.setStatusBarMessage(`Remaining time: ${remainingTime} minutes`);
+            vscode.window.showInformationMessage(`${remainingTime} minutes remaining`);
+            setTimeout(() => {
+                vscode.window.setStatusBarMessage('');
+            }, 5000); // 5000 milliseconds = 5 seconds
 			const remainingTimeMs = remainingTime * 60 * 1000; // Convert minutes to milliseconds
 			let remainingTimeInMinutes = remainingTime; // Assuming remainingTime is in minutes
 
