@@ -100,30 +100,57 @@ async function IsRunning() {
 }
 
 
+let Statusbar_startstop = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let Statusbar_time= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
 
 function updateStatusBarItem(status) {
     if (status) {
-        myStatusBarItem.command = 'arcade.Start';
-        myStatusBarItem.text = "$(debug-start) Start Session";
-        myStatusBarItem.tooltip = "Click to start an arcade session";
+        Statusbar_startstop.command = 'arcade.Start';
+        Statusbar_startstop.text = "$(debug-start) Start Session";
+        Statusbar_startstop.tooltip = "Click to start an arcade session";
     } else {
-        myStatusBarItem.command = 'arcade.Stop';
-        myStatusBarItem.text = "$(debug-stop) End Session";
-        myStatusBarItem.tooltip = "Click to end the arcade session";
+        Statusbar_startstop.command = 'arcade.Stop';
+        Statusbar_startstop.text = "$(debug-stop) End Session";
+        Statusbar_startstop.tooltip = "Click to end the arcade session";
+        Statusbar_pause.text = "Pause";
+        Statusbar_pause.show();
+        timeleft();
     }
-    myStatusBarItem.show();
+    Statusbar_startstop.show();
 }
 
 
+function timeleft(){
+    let remainingTimeInMinutes = 60; // Assuming remainingTime is in minutes
+    vscode.window.showInformationMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+    vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+    const countdownInterval = setInterval(() => {
+        remainingTimeInMinutes -= 1;
+        console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
+        vscode.window.showInformationMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+        vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+        Statusbar_time.text = `Remaining time: ${remainingTimeInMinutes} minutes`;
+        Statusbar_time.show();
+
+        if (remainingTimeInMinutes <= 0) {
+            clearInterval(countdownInterval);
+            console.log('Timer ended');
+            vscode.window.showInformationMessage('The timer has ended.');
+        }
+    }, 60000); // 60000 milliseconds = 1 minute
+}
 
 // @ts-ignor
-let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
 
 
 async function activate(context) {
 
 
-    let SESH_Ended = Boolean(await IsRunning());
+    //let SESH_Ended = Boolean(await IsRunning());
+    let SESH_Ended = false;
     updateStatusBarItem(SESH_Ended);
 
 
@@ -136,7 +163,7 @@ async function activate(context) {
         await callAPI(`POST`, `start`, Sesh_Name);
         console.log(`SESH_Ended after start: ${false}`);
         updateStatusBarItem(false);
-        showMessage(`${Sesh_Name} session started successfully!`);
+        showMessage(`${Sesh_Name}: Session Started!`);
         
         
     });
@@ -148,6 +175,7 @@ async function activate(context) {
         console.log(`SESH_Ended after stop: ${true}`);
         updateStatusBarItem(true);
         showMessage('Session cancled successfully!');
+        
         
     });
 
@@ -171,34 +199,7 @@ async function activate(context) {
 
     let Time = vscode.commands.registerCommand('arcade.Time', async function () {
 
-            const data = await callAPI('GET', `session`, null);
-            console.log(data); // Or handle the data as needed
-            
-            // @ts-ignore
-            const remainingTime = data.data.remaining;
-            console.log(remainingTime);
-            // Optionally display a success message in the status bar
-
-            vscode.window.setStatusBarMessage(`Remaining time: ${remainingTime} minutes`);
-            vscode.window.showInformationMessage(`${remainingTime} minutes remaining`);
-
-
-			let remainingTimeInMinutes = remainingTime; // Assuming remainingTime is in minutes
-
-            // Start a countdown timer
-			const countdownInterval = setInterval(() => {
-				remainingTimeInMinutes -= 1;
-				console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
-				vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
-
-				if (remainingTimeInMinutes <= 0) {
-					clearInterval(countdownInterval);
-					console.log('Timer ended');
-					vscode.window.showInformationMessage('The timer has ended.');
-				}
-			}, 60000); // 60000 milliseconds = 1 minute
-
-
+            // Nothing for now
     });
     
     
@@ -219,13 +220,10 @@ async function activate(context) {
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
-                // @ts-ignore
-                // @ts-ignore
-                console.log(response);
+
             }
 
             // Handle the response data
-            // @ts-ignore
             // @ts-ignore
             const data = await response.json();
             showMessage('Session paused successfully!');
@@ -237,6 +235,7 @@ async function activate(context) {
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
         IsRunning();
+        console.log(`Test works!`);
 
         
         });
@@ -249,7 +248,7 @@ async function activate(context) {
 
 
 
-    context.subscriptions.push(myStatusBarItem, Setup_f, Time, StartCommand, StopCommand, PauseCommand, Test,);
+    context.subscriptions.push(Statusbar_startstop, Setup_f, Time, StartCommand, StopCommand, PauseCommand, Test,);
 }
 
 exports.activate = activate;
