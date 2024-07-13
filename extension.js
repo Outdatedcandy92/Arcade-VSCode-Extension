@@ -57,8 +57,7 @@ async function callAPI(method, destination, body_content) {
 
         //for testing purpose
         // @ts-ignore
-        vscode.window.showInformationMessage(`CALLAPI WORKS`);
-        console.log(data);
+        console.log(`CallAPI working`);
 
 
         return data; // Return the data for use in other parts of your application
@@ -89,86 +88,67 @@ async function IsRunning() {
     // @ts-ignore
     const latestEntry = History.data[History.data.length - 1];
 
-    const SESH_Ended = latestEntry.ended;
+    let SESH_Ended = latestEntry.ended;
 
-    console.log(`IsEnd: ${SESH_Ended}`);
+    console.log(`is Running working`);
 
     return SESH_Ended;
+
     
 
 
 }
 
 
-async function startSesh() {
-    const userCommand = await vscode.window.showInputBox({ prompt: 'Name of the session' });
-    if (!userCommand) {
-        vscode.window.showInformationMessage('Empty Title');
-        return; // Exit if no command was entered
+
+function updateStatusBarItem(status) {
+    if (status) {
+        myStatusBarItem.command = 'arcade.Start';
+        myStatusBarItem.text = "$(debug-start) Start Session";
+        myStatusBarItem.tooltip = "Click to start an arcade session";
+    } else {
+        myStatusBarItem.command = 'arcade.Stop';
+        myStatusBarItem.text = "$(debug-stop) End Session";
+        myStatusBarItem.tooltip = "Click to end the arcade session";
     }
-    
-    const StartURL = `https://hackhour.hackclub.com/api/start/${slackId}`;
-
-        try {
-            const response = await (await fetch)(StartURL, {
-                method: 'POST', // Specify the method
-                headers: {
-                    'Authorization': `Bearer ${apikey}`,
-                    'Content-Type': 'application/json' // Specify the content type
-                },
-                body: JSON.stringify({ work: userCommand })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-                // @ts-ignore
-                // @ts-ignore
-                console.log(response);
-            }
-
-            // Handle the response data
-            // @ts-ignore
-            // @ts-ignore
-            const data = await response.json();
-            showMessage('Session ended successfully!');
-        } catch (error) {
-            console.error('Error starting session: ', error);
-            vscode.window.showErrorMessage('Failed to end the session.');
-        }
-    showMessage(`${userCommand}: session started successfully!`);
-
+    myStatusBarItem.show();
 }
 
 
 
 // @ts-ignor
 let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-let SESH_Ended = true;
-
-function activate(context) {
 
 
+async function activate(context) {
 
 
-    if (SESH_Ended) {
-        myStatusBarItem.command = 'arcade.Start'; // Associate the command with the status bar item
-        myStatusBarItem.text = "$(debug-start) Start Session"; // Set text - you can use icons as well
-        myStatusBarItem.tooltip = "Click to start an arcade session"; // Set tooltip
-        myStatusBarItem.show();
-    
-    } else {
-        myStatusBarItem.command = 'arcade.Stop'; // Associate the command with the status bar item
-        myStatusBarItem.text = "$(debug-stop) End Session"; // Set text - you can use icons as well
-        myStatusBarItem.tooltip = "Click to start an arcade session"; // Set tooltip
-        myStatusBarItem.show();
-
-    }
+    let SESH_Ended = Boolean(await IsRunning());
+    updateStatusBarItem(SESH_Ended);
 
 
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
-
+        const Sesh_Name = await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        if (!Sesh_Name) {
+            vscode.window.showInformationMessage('Empty Title');
+            return; // Exit if no command was entered
+        }
+        await callAPI(`POST`, `start`, Sesh_Name);
+        console.log(`SESH_Ended after start: ${false}`);
+        updateStatusBarItem(false);
+        showMessage(`${Sesh_Name} session started successfully!`);
         
-        callAPI(`POST`, `start`, `test`);
+        
+    });
+
+    let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
+
+        callAPI(`POST`, `cancel`, null);
+        let Stat = Boolean(await IsRunning());
+        console.log(`SESH_Ended after stop: ${true}`);
+        updateStatusBarItem(true);
+        showMessage('Session cancled successfully!');
+        
     });
 
 
@@ -223,36 +203,7 @@ function activate(context) {
     
     
 
-    let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
-
-        const StartURL = `https://hackhour.hackclub.com/api/cancel/${slackId}`;
-
-        try {
-            const response = await (await fetch)(StartURL, {
-                method: 'POST', // Specify the method
-                headers: {
-                    'Authorization': `Bearer ${apikey}`,
-                    'Content-Type': 'application/json' // Specify the content type
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-                // @ts-ignore
-                // @ts-ignore
-                console.log(response);
-            }
-
-            // Handle the response data
-            // @ts-ignore
-            // @ts-ignore
-            const data = await response.json();
-            showMessage('Session ended successfully!');
-        } catch (error) {
-            console.error('Error starting session: ', error);
-            vscode.window.showErrorMessage('Failed to end the session.');
-        }
-    });
+    
     let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
 
         const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
