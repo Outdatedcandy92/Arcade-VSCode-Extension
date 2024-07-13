@@ -35,6 +35,10 @@
       {
         "command": "arcade.Test",
         "title": "Arcade: Test"
+      },
+      {
+        "command": "arcade.Setup",
+        "title": "Arcade: Setup"
       }
     ]
   },

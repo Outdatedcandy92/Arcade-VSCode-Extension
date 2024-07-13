@@ -68,20 +68,44 @@ async function callAPI(method, destination, body_content) {
     }
 }
 
-function IsStart() {
-    const Check = callAPI('GET', `session`, null);
+async function IsPaused() {
+    const Check =  await callAPI('GET', `session`, null);
+    console.log(`Check: ${Check}`);
+    const Paused = Check.data.paused;
+    vscode.window.showInformationMessage(`IsPaused works!`);
+    return Paused;
 }
+
+let SESHACTIVE = true;
 // @ts-ignor
+let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
 
 function activate(context) {
 
-    let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    myStatusBarItem.command = 'arcade.Test'; // Associate the command with the status bar item
-    myStatusBarItem.text = "$(rocket) Click Me"; // Set text - you can use icons as well
-    myStatusBarItem.tooltip = "Click to run my command"; // Set tooltip
-    myStatusBarItem.show();
+    if (SESHACTIVE) {
+        myStatusBarItem.command = 'arcade.Test'; // Associate the command with the status bar item
+        myStatusBarItem.text = "$(debug-stop) End Session"; // Set text - you can use icons as well
+        myStatusBarItem.tooltip = "Click to run my command"; // Set tooltip
+        myStatusBarItem.show();
+    
+    } else {
+        myStatusBarItem.command = 'arcade.Test'; // Associate the command with the status bar item
+        myStatusBarItem.text = "$(debug-start) Start Session"; // Set text - you can use icons as well
+        myStatusBarItem.tooltip = "Click to start an arcade session"; // Set tooltip
+        myStatusBarItem.show();
+    }
 
-
+    let Setup_f = vscode.commands.registerCommand('arcade.Setup', async () => {
+        //await callAPI('GET', `session`, null);
+        //IsPaused();
+        const userCommand = await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        if (!userCommand) {
+            vscode.window.showInformationMessage('Empty Title');
+            return; // Exit if no command was entered
+        }
+        
+        });
 
 
 
@@ -212,7 +236,14 @@ function activate(context) {
     });
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
-        await callAPI('GET', `stats`, null);
+        //await callAPI('GET', `session`, null);
+        //IsPaused();
+        const userCommand = await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        if (!userCommand) {
+            vscode.window.showInformationMessage('Empty Title');
+            return; // Exit if no command was entered
+        }
+        
         });
 
 
@@ -223,7 +254,7 @@ function activate(context) {
 
 
 
-    context.subscriptions.push(myStatusBarItem, Time, StartCommand, StopCommand, PauseCommand, Test,);
+    context.subscriptions.push(myStatusBarItem, Setup_f, Time, StartCommand, StopCommand, PauseCommand, Test,);
 }
 
 exports.activate = activate;
