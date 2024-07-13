@@ -39,3 +39,13 @@ Check if session is active
 
             {display time}
 
+
+
+Session Check Plan
+
+Check if IsEnd is true:
+    If ended show start option
+        when started set IsEnd To false
+
+    If not ended Display timer
+        Show Pause and End Button    
