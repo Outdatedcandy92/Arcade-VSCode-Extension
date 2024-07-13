@@ -10,3 +10,32 @@
 - notifiction when new session starts
 - noti when session ends
 
+
+
+
+The flow
+
+On Start:
+Check if session is active
+
+    if active{ Display time}
+        stop btn and pause/resume button
+
+        Update timer
+
+        Send notis at (45 , 30 , 10 , 5, 0 min)
+
+        Congrats message at sesh end
+
+
+
+    If !active{Show start sesh button}
+
+        when start buton click
+
+            Ask sesh name
+
+            Show Noti 
+
+            {display time}
+

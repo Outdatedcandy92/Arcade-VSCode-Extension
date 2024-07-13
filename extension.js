@@ -26,7 +26,53 @@ function showMessage(message){
 }
 
 
+
+async function fetchData() {
+    const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
+    try {
+        const response = await (await fetch)(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apikey}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(data); // Or handle the data as needed
+
+        // @ts-ignore
+        const isPaused = data.data.paused;
+        console.log(isPaused);
+        // Optionally display a success message in the status bar
+
+        vscode.window.showInformationMessage(`${isPaused} minutes remaining`);
+
+    } catch (error) {
+        console.error('Error fetching data: ', error);
+        vscode.window.showErrorMessage('Failed to ping the API.');
+    }
+}
+
+// @ts-ignor
+
 function activate(context) {
+
+    let myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    myStatusBarItem.command = 'arcade.Test'; // Associate the command with the status bar item
+    myStatusBarItem.text = "$(rocket) Click Me"; // Set text - you can use icons as well
+    myStatusBarItem.tooltip = "Click to run my command"; // Set tooltip
+    myStatusBarItem.show();
+
+
+
+
+
+
+
     let Time = vscode.commands.registerCommand('arcade.Time', async function () {
 
         const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
@@ -45,17 +91,18 @@ function activate(context) {
             const data = await response.json();
             console.log(data); // Or handle the data as needed
             
+            // @ts-ignore
             const remainingTime = data.data.remaining;
             console.log(remainingTime);
             // Optionally display a success message in the status bar
+
             vscode.window.setStatusBarMessage(`Remaining time: ${remainingTime} minutes`);
             vscode.window.showInformationMessage(`${remainingTime} minutes remaining`);
-            setTimeout(() => {
-                vscode.window.setStatusBarMessage('');
-            }, 5000); // 5000 milliseconds = 5 seconds
-			const remainingTimeMs = remainingTime * 60 * 1000; // Convert minutes to milliseconds
+
+
 			let remainingTimeInMinutes = remainingTime; // Assuming remainingTime is in minutes
 
+            // Start a countdown timer
 			const countdownInterval = setInterval(() => {
 				remainingTimeInMinutes -= 1;
 				console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
@@ -76,6 +123,7 @@ function activate(context) {
             vscode.window.showErrorMessage('Failed to ping the API.');
         }
     });
+    
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
 
         const StartURL = `https://hackhour.hackclub.com/api/start/${slackId}`;
@@ -100,6 +148,7 @@ function activate(context) {
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
+                // @ts-ignore
                 console.log(response);
             }
 
@@ -125,10 +174,12 @@ function activate(context) {
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
+                // @ts-ignore
                 console.log(response);
             }
 
             // Handle the response data
+            // @ts-ignore
             const data = await response.json();
             showMessage('Session ended successfully!');
         } catch (error) {
@@ -151,10 +202,12 @@ function activate(context) {
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
+                // @ts-ignore
                 console.log(response);
             }
 
             // Handle the response data
+            // @ts-ignore
             const data = await response.json();
             showMessage('Session paused successfully!');
         } catch (error) {
@@ -162,29 +215,20 @@ function activate(context) {
             vscode.window.showErrorMessage('Failed to end the session.');
         }
     });
-    let Test = vscode.commands.registerCommand('arcade.Test', async () => {
-        vscode.window.withProgress(
-            {
-              location: vscode.ProgressLocation.Notification,
-              cancellable: false,
-            },
-            async (progress) => {
-              return new Promise((resolve) => {
-                for (let i = 1; i <= 100; i++) {
-                  setTimeout(() => {
-                    progress.report({ increment: 1, message: ` Started Session:` });
-                    if (i === 100) {
-                      resolve();
-                    }
-                  }, i * 50); // Adjust the delay for each iteration
-                }
-              });
-            }
-          );
-    
-    });
 
-    context.subscriptions.push(Time, StartCommand, StopCommand, PauseCommand, Test);
+    let Test = vscode.commands.registerCommand('arcade.Test', async () => {
+        await fetchData();
+        });
+
+
+
+
+
+
+
+
+
+    context.subscriptions.push(myStatusBarItem, Time, StartCommand, StopCommand, PauseCommand, Test,);
 }
 
 exports.activate = activate;
