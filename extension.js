@@ -26,37 +26,51 @@ function showMessage(message){
 }
 
 
+async function callAPI(method, destination, body_content) {
 
-async function fetchData() {
-    const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
+    const url = `https://hackhour.hackclub.com/api/${destination}/${slackId}`;
     try {
-        const response = await (await fetch)(url, {
-            method: 'GET',
+        let fetchOptions = {
+            method: method, // Specify the method
             headers: {
-                'Authorization': `Bearer ${apikey}`
+                'Authorization': `Bearer ${apikey}`,
+                'Content-Type': 'application/json' // Specify the content type
             }
-        });
+        };
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Conditionally add the body property if the method is POST
+        if (method.toUpperCase() === 'POST') {
+            fetchOptions.body = JSON.stringify(body_content);
         }
 
+        const response = await (await fetch)(url, fetchOptions);
+
+        if (!response.ok) {
+            vscode.window.showErrorMessage('Failed to ping the API.');
+            throw new Error(`HTTP error! status: ${response.status}`);
+            // @ts-ignore
+            console.log(response);
+        }
         const data = await response.json();
-        console.log(data); // Or handle the data as needed
 
+        //for testing purpose
         // @ts-ignore
-        const isPaused = data.data.paused;
-        console.log(isPaused);
-        // Optionally display a success message in the status bar
+        vscode.window.showInformationMessage(`CALLAPI WORKS`);
+        console.log(data);
 
-        vscode.window.showInformationMessage(`${isPaused} minutes remaining`);
+
+        return data; // Return the data for use in other parts of your application
 
     } catch (error) {
-        console.error('Error fetching data: ', error);
-        vscode.window.showErrorMessage('Failed to ping the API.');
+        console.error('Error starting session: ', error);
+        vscode.window.showErrorMessage('Failed to start the session.');
+        return null; // Return null if an error occurred
     }
 }
 
+function IsStart() {
+    const Check = callAPI('GET', `session`, null);
+}
 // @ts-ignor
 
 function activate(context) {
@@ -75,20 +89,7 @@ function activate(context) {
 
     let Time = vscode.commands.registerCommand('arcade.Time', async function () {
 
-        const url = `https://hackhour.hackclub.com/api/session/${slackId}`;
-        try {
-            const response = await (await fetch)(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${apikey}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await callAPI('GET', `session`, null);
             console.log(data); // Or handle the data as needed
             
             // @ts-ignore
@@ -116,12 +117,6 @@ function activate(context) {
 			}, 60000); // 60000 milliseconds = 1 minute
 
 
-			
-
-        } catch (error) {
-            console.error('Error fetching data: ', error);
-            vscode.window.showErrorMessage('Failed to ping the API.');
-        }
     });
     
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
@@ -217,7 +212,7 @@ function activate(context) {
     });
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
-        await fetchData();
+        await callAPI('GET', `stats`, null);
         });
 
 
