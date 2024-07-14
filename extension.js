@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const fetch = import('node-fetch').then(module => module.default);
 
 const { apikey } = require('./config.js');
-const slackId = 'U079HV9PTC7';
+const { slackId } = require('./config.js');
 
 function showMessage(message){
     vscode.window.withProgress(
@@ -70,14 +70,7 @@ async function callAPI(method, destination, body_content) {
 }
 
 // @ts-ignore
-async function IsPaused() {
-    const Check =  await callAPI('GET', `session`, null);
-    console.log(`Check: ${Check}`);
-    // @ts-ignore
-    const Paused = Check.data.paused;
-    vscode.window.showInformationMessage(`IsPaused works!`);
-    return Paused;
-}
+
 
 
 
@@ -89,8 +82,6 @@ async function IsRunning() {
     const latestEntry = History.data[History.data.length - 1];
 
     let SESH_Ended = latestEntry.ended;
-
-    console.log(`is Running working`);
 
     return SESH_Ended;
 
@@ -104,8 +95,7 @@ let Statusbar_startstop = vscode.window.createStatusBarItem(vscode.StatusBarAlig
 let Statusbar_time= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 
-
-function updateStatusBarItem(status) {
+function updateStatusBarItem(status, paused) {
     if (status) {
         Statusbar_startstop.command = 'arcade.Start';
         Statusbar_startstop.text = "$(debug-start) Start Session";
@@ -114,50 +104,50 @@ function updateStatusBarItem(status) {
         Statusbar_startstop.command = 'arcade.Stop';
         Statusbar_startstop.text = "$(debug-stop) End Session";
         Statusbar_startstop.tooltip = "Click to end the arcade session";
-        Statusbar_pause.text = "Pause";
+        if (paused) {
+            Statusbar_pause.text = "$(debug-pause) Resume Session";
+        } else {
+            Statusbar_pause.text = "$(debug-pause) Pause Session";
+        }
         Statusbar_pause.show();
-        timeleft();
+        timeleft(60);
     }
     Statusbar_startstop.show();
 }
 
 
-function timeleft(){
-    let remainingTimeInMinutes = 60; // Assuming remainingTime is in minutes
-    vscode.window.showInformationMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
-    vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
+function timeleft(rem){
+    let remainingTimeInMinutes = rem; // Assuming remainingTime is in minutes
+   Statusbar_time.text=(`Remaining time: ${remainingTimeInMinutes} minutes`);
     const countdownInterval = setInterval(() => {
         remainingTimeInMinutes -= 1;
         console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
-        vscode.window.showInformationMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
-        vscode.window.setStatusBarMessage(`Remaining time: ${remainingTimeInMinutes} minutes`);
-        Statusbar_time.text = `Remaining time: ${remainingTimeInMinutes} minutes`;
+        Statusbar_time.text=(`Remaining time: ${remainingTimeInMinutes} minutes`);
         Statusbar_time.show();
 
         if (remainingTimeInMinutes <= 0) {
             clearInterval(countdownInterval);
             console.log('Timer ended');
-            vscode.window.showInformationMessage('The timer has ended.');
+            vscode.window.showInformationMessage('Congraturations! You have completed the session!');
         }
     }, 60000); // 60000 milliseconds = 1 minute
 }
 
 // @ts-ignor
-
+let isPaused;
 
 
 async function activate(context) {
 
 
-    //let SESH_Ended = Boolean(await IsRunning());
-    let SESH_Ended = false;
+    let SESH_Ended = Boolean(await IsRunning());
     updateStatusBarItem(SESH_Ended);
 
 
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
         const Sesh_Name = await vscode.window.showInputBox({ prompt: 'Name of the session' });
         if (!Sesh_Name) {
-            vscode.window.showInformationMessage('Empty Title');
+            vscode.window.showInformationMessage('No session name entered!');
             return; // Exit if no command was entered
         }
         await callAPI(`POST`, `start`, Sesh_Name);
@@ -171,12 +161,26 @@ async function activate(context) {
     let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
 
         callAPI(`POST`, `cancel`, null);
-        let Stat = Boolean(await IsRunning());
         console.log(`SESH_Ended after stop: ${true}`);
         updateStatusBarItem(true);
         showMessage('Session cancled successfully!');
         
         
+    });
+
+    let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
+
+        const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
+        const paused = callAPI(`POST`, `pause`, null);
+
+        // When Paused, set isPaused to true
+        //when ispaused is true, show the resume button
+        //when ispaused is false, show the pause button
+
+        // @ts-ignore
+        isPaused = paused.data.paused;
+        updateStatusBarItem(false, isPaused);
+
     });
 
 
@@ -205,33 +209,7 @@ async function activate(context) {
     
 
     
-    let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
-
-        const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
-
-        try {
-            const response = await (await fetch)(StartURL, {
-                method: 'POST', // Specify the method
-                headers: {
-                    'Authorization': `Bearer ${apikey}`,
-                    'Content-Type': 'application/json' // Specify the content type
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-
-            }
-
-            // Handle the response data
-            // @ts-ignore
-            const data = await response.json();
-            showMessage('Session paused successfully!');
-        } catch (error) {
-            console.error('Error starting session: ', error);
-            vscode.window.showErrorMessage('Failed to end the session.');
-        }
-    });
+    
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
         IsRunning();
