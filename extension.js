@@ -27,8 +27,8 @@ function showMessage(message){
 
 
 async function callAPI(method, destination, body_content) {
-
     const url = `https://hackhour.hackclub.com/api/${destination}/${slackId}`;
+    console.log(`URL: ${url}`);
     try {
         let fetchOptions = {
             method: method, // Specify the method
@@ -37,15 +37,14 @@ async function callAPI(method, destination, body_content) {
                 'Content-Type': 'application/json' // Specify the content type
             }
         };
-
         // Conditionally add the body property if the method is POST
         if (body_content) {
             fetchOptions.body = JSON.stringify({ work: body_content });
             console.log(`body not null sent work`);
         }
-
+        console.log(`fetchOptions: ${fetchOptions}`);
         const response = await (await fetch)(url, fetchOptions);
-
+        console.log(`response: ${response}`);
         if (!response.ok) {
             vscode.window.showErrorMessage('Failed to ping the API.');
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,14 +53,16 @@ async function callAPI(method, destination, body_content) {
             console.log(response);
         }
         const data = await response.json();
+        console.log(data);
 
         //for testing purpose
         // @ts-ignore
+        vscode.window.showInformationMessage(`CALLAPI WORKS`);
+        console.log(data);
         console.log(`CallAPI working`);
 
 
         return data; // Return the data for use in other parts of your application
-
     } catch (error) {
         console.error('Error starting session: ', error);
         vscode.window.showErrorMessage('Failed to start the session.');
@@ -74,10 +75,11 @@ async function callAPI(method, destination, body_content) {
 
 
 
-
-async function IsRunning() {
-    const History = await callAPI('GET', `history`, null);
-
+// 1) CHECKS IF SESSION IS ACTIVE
+async function IsRunning() { 
+    console.log(`1.1 Is rnning called`);
+    const History = await callAPI('GET', `history`);
+    console.log(`1.1 Is rnning finished`);
     // @ts-ignore
     const latestEntry = History.data[History.data.length - 1];
 
@@ -95,22 +97,27 @@ let Statusbar_startstop = vscode.window.createStatusBarItem(vscode.StatusBarAlig
 let Statusbar_time= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 
+//2) IF SESSION IS ACTIVE, SHOW THE PAUSE BUTTON ELSE SHOW THE START BUTTON
 function updateStatusBarItem(status, paused) {
     if (status) {
+        // 3.1) If the session is not active, show the start button
         Statusbar_startstop.command = 'arcade.Start';
         Statusbar_startstop.text = "$(debug-start) Start Session";
         Statusbar_startstop.tooltip = "Click to start an arcade session";
     } else {
+        // 3.2) If the session is active, show the stop and time left
         Statusbar_startstop.command = 'arcade.Stop';
         Statusbar_startstop.text = "$(debug-stop) End Session";
         Statusbar_startstop.tooltip = "Click to end the arcade session";
+        timeleft(60);
+        // 3.2.1) If the session is active, show the pause button
         if (paused) {
             Statusbar_pause.text = "$(debug-pause) Resume Session";
-        } else {
+        } else { // 3.2.2) If the session is active, show the resume button
             Statusbar_pause.text = "$(debug-pause) Pause Session";
         }
         Statusbar_pause.show();
-        timeleft(60);
+        
     }
     Statusbar_startstop.show();
 }
@@ -128,7 +135,8 @@ function timeleft(rem){
         if (remainingTimeInMinutes <= 0) {
             clearInterval(countdownInterval);
             console.log('Timer ended');
-            vscode.window.showInformationMessage('Congraturations! You have completed the session!');
+            showMessage('Congratulations! You have completed your session!');
+            updateStatusBarItem(true);
         }
     }, 60000); // 60000 milliseconds = 1 minute
 }
@@ -143,14 +151,14 @@ async function activate(context) {
     let SESH_Ended = Boolean(await IsRunning());
     updateStatusBarItem(SESH_Ended);
 
-
+    // WHEN START CLICKED
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
-        const Sesh_Name = await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        const Sesh_Name = "something"//await vscode.window.showInputBox({ prompt: 'Name of the session' });
         if (!Sesh_Name) {
             vscode.window.showInformationMessage('No session name entered!');
             return; // Exit if no command was entered
         }
-        await callAPI(`POST`, `start`, Sesh_Name);
+        await callAPI(`POST`, `start`, "somet");
         console.log(`SESH_Ended after start: ${false}`);
         updateStatusBarItem(false);
         showMessage(`${Sesh_Name}: Session Started!`);
@@ -158,14 +166,15 @@ async function activate(context) {
         
     });
 
+        // IF END (!not active)
     let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
 
         callAPI(`POST`, `cancel`, null);
         console.log(`SESH_Ended after stop: ${true}`);
-        updateStatusBarItem(true);
-        showMessage('Session cancled successfully!');
+        updateStatusBarItem(true); 
+        showMessage('Session Ended successfully!');
         
-        
+         
     });
 
     let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
@@ -199,21 +208,10 @@ async function activate(context) {
 
 
 
-
-
-    let Time = vscode.commands.registerCommand('arcade.Time', async function () {
-
-            // Nothing for now
-    });
-    
-    
-
-    
     
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
-        IsRunning();
-        console.log(`Test works!`);
+        
 
         
         });
@@ -226,7 +224,7 @@ async function activate(context) {
 
 
 
-    context.subscriptions.push(Statusbar_startstop, Setup_f, Time, StartCommand, StopCommand, PauseCommand, Test,);
+    context.subscriptions.push(Statusbar_startstop, Setup_f, StartCommand, StopCommand, PauseCommand, Test);
 }
 
 exports.activate = activate;
