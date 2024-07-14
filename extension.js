@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 
-// extension.js
+const fs = require('fs');
+const path = require('path');
 
 // extension.js
 const { apikey, slackId } = require('./config.js');
@@ -55,7 +56,7 @@ async function callAPI(method_a , destination, body_content) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        vscode.window.showInformationMessage(`CALLAPI WORKS`);
+        //vscode.window.showInformationMessage(`CALLAPI WORKS`);
         console.log(data);
         console.log(`CallAPI working`);
         return data;
@@ -73,13 +74,15 @@ async function callAPI(method_a , destination, body_content) {
 
 // 1) CHECKS IF SESSION IS ACTIVE
 async function IsRunning() { 
-    console.log(`1.1 Is rnning called`);
+    console.log(`1.1 Is running called`);
     const History = await callAPI('GET', 'history', null);
-    console.log(`1.1 Is rnning finished`);
+    console.log(`1.1 Is running finished`);
     // @ts-ignore
     const latestEntry = History.data[History.data.length - 1];
 
     let SESH_Ended = latestEntry.ended;
+    console.log(History)
+    console.log(SESH_Ended); 
 
     return SESH_Ended;
 
@@ -123,11 +126,12 @@ function updateStatusBarItem(status, paused) {
 
 function timeleft(rem){
     let remainingTimeInMinutes = rem; // Assuming remainingTime is in minutes
-   Statusbar_time.text=(`Remaining time: ${remainingTimeInMinutes} minutes`);
+    Statusbar_time.text=(`$(clock) ${remainingTimeInMinutes} minutes`);
+    Statusbar_time.show();
     const countdownInterval = setInterval(() => {
         remainingTimeInMinutes -= 1;
         console.log(`Remaining time: ${remainingTimeInMinutes} minutes`);
-        Statusbar_time.text=(`Remaining time: ${remainingTimeInMinutes} minutes`);
+        Statusbar_time.text = `$(clock) ${remainingTimeInMinutes} minutes`;
         Statusbar_time.show();
 
         if (remainingTimeInMinutes <= 0) {
@@ -151,7 +155,7 @@ async function activate(context) {
 
     // WHEN START CLICKED
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
-        const Sesh_Name = "something"//await vscode.window.showInputBox({ prompt: 'Name of the session' });
+        const Sesh_Name = await vscode.window.showInputBox({ prompt: 'Name of the session' });
         if (!Sesh_Name) {
             vscode.window.showInformationMessage('No session name entered!');
             return; // Exit if no command was entered
@@ -194,14 +198,24 @@ async function activate(context) {
 
 
     let Setup_f = vscode.commands.registerCommand('arcade.Setup', async () => {
-        //await callAPI('GET', `session`, null);
-        //IsPaused();
-        const userCommand = await vscode.window.showInputBox({ prompt: 'Name of the session' });
-        if (!userCommand) {
+        console.log(`Setup called`);
+        const user_API = await vscode.window.showInputBox({ prompt: 'Enter APIKEY' });
+        if (!user_API) {
+            vscode.window.showInformationMessage('Empty Title');
+            return; // Exit if no command was entered
+        }
+        const user_Slack = await vscode.window.showInputBox({ prompt: 'Enter Slack ID' });
+        if (!user_Slack) {
             vscode.window.showInformationMessage('Empty Title');
             return; // Exit if no command was entered
         }
         
+        const configPath = path.join(__dirname, 'config.js');
+        const configContent = `const apikey = '${user_API}';\nconst slackId = '${user_Slack}';\nmodule.exports = { apikey, slackId };`;
+    
+        // Check if config.js exists, if not it will be created with the content, if it does it will overwrite it with new content
+        fs.writeFileSync(configPath, configContent, 'utf8');
+
         });
 
 
@@ -209,6 +223,13 @@ async function activate(context) {
     
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
+        console.log(`Test called`);
+        const url = `http://hackhour.hackclub.com/ping/`;
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data);
+
+    
         
         });
 
