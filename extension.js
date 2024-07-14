@@ -1,8 +1,10 @@
 const vscode = require('vscode');
-const fetch = import('node-fetch').then(module => module.default);
 
-const { apikey } = require('./config.js');
-const { slackId } = require('./config.js');
+// extension.js
+
+// extension.js
+const { apikey, slackId } = require('./config.js');
+
 
 function showMessage(message){
     vscode.window.withProgress(
@@ -26,47 +28,41 @@ function showMessage(message){
 }
 
 
-async function callAPI(method, destination, body_content) {
-    const url = `https://hackhour.hackclub.com/api/${destination}/${slackId}`;
+async function callAPI(method_a , destination, body_content) {
+    
+    const nodeFetchModule = await import('node-fetch');
+    const fetch = nodeFetchModule.default;
+    console.log(`CallAPI called`);
+    const url = `http://hackhour.hackclub.com/api/${destination}/${slackId}`;
     console.log(`URL: ${url}`);
     try {
         let fetchOptions = {
-            method: method, // Specify the method
+            method: method_a,
             headers: {
                 'Authorization': `Bearer ${apikey}`,
-                'Content-Type': 'application/json' // Specify the content type
+                'Content-Type': 'application/json'
             }
         };
-        // Conditionally add the body property if the method is POST
-        if (body_content) {
-            fetchOptions.body = JSON.stringify({ work: body_content });
-            console.log(`body not null sent work`);
+        if (method_a === 'POST' && body_content) {
+           fetchOptions.body = JSON.stringify({ work: body_content });
+            console.log(`Body not null, sent work`);
         }
-        console.log(`fetchOptions: ${fetchOptions}`);
-        const response = await (await fetch)(url, fetchOptions);
-        console.log(`response: ${response}`);
+        console.log(`Fetch options: ${JSON.stringify(fetchOptions)}`);
+        const response = await fetch(url, fetchOptions);
+        console.log(`Response status: ${response.status}, status text: ${response.statusText}`);
         if (!response.ok) {
             vscode.window.showErrorMessage('Failed to ping the API.');
             throw new Error(`HTTP error! status: ${response.status}`);
-            // @ts-ignore
-            // @ts-ignore
-            console.log(response);
         }
         const data = await response.json();
-        console.log(data);
-
-        //for testing purpose
-        // @ts-ignore
         vscode.window.showInformationMessage(`CALLAPI WORKS`);
         console.log(data);
         console.log(`CallAPI working`);
-
-
-        return data; // Return the data for use in other parts of your application
+        return data;
     } catch (error) {
         console.error('Error starting session: ', error);
         vscode.window.showErrorMessage('Failed to start the session.');
-        return null; // Return null if an error occurred
+        return null;
     }
 }
 
@@ -78,7 +74,7 @@ async function callAPI(method, destination, body_content) {
 // 1) CHECKS IF SESSION IS ACTIVE
 async function IsRunning() { 
     console.log(`1.1 Is rnning called`);
-    const History = await callAPI('GET', `history`);
+    const History = await callAPI('GET', 'history', null);
     console.log(`1.1 Is rnning finished`);
     // @ts-ignore
     const latestEntry = History.data[History.data.length - 1];
@@ -99,6 +95,8 @@ let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignmen
 
 //2) IF SESSION IS ACTIVE, SHOW THE PAUSE BUTTON ELSE SHOW THE START BUTTON
 function updateStatusBarItem(status, paused) {
+    console.log(`2.1 updateStatusBarItem called`);
+    console.log(`2.2 status: ${status}`);
     if (status) {
         // 3.1) If the session is not active, show the start button
         Statusbar_startstop.command = 'arcade.Start';
@@ -211,8 +209,6 @@ async function activate(context) {
     
 
     let Test = vscode.commands.registerCommand('arcade.Test', async () => {
-        
-
         
         });
 

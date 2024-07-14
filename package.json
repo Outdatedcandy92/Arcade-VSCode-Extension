@@ -18,7 +18,6 @@
       {
         "command": "arcade.Time",
         "title": "Arcade: Time"
-        
       },
       {
         "command": "arcade.Start",
@@ -59,5 +58,4 @@
   "dependencies": {
     "node-fetch": "^3.3.2"
   }
-  
 }
