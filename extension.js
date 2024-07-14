@@ -5,7 +5,9 @@ const path = require('path');
 
 // extension.js
 const { apikey, slackId } = require('./config.js');
-
+let isPaused;
+let SESH_Ended;
+let time_left;
 
 function showMessage(message){
     vscode.window.withProgress(
@@ -75,20 +77,29 @@ async function callAPI(method_a , destination, body_content) {
 // 1) CHECKS IF SESSION IS ACTIVE
 async function IsRunning() { 
     console.log(`1.1 Is running called`);
-    const History = await callAPI('GET', 'history', null);
-    console.log(`1.1 Is running finished`);
-    // @ts-ignore
-    const latestEntry = History.data[History.data.length - 1];
+    const data = await callAPI('GET', 'history', null); 
+    let found = false;
 
-    let SESH_Ended = latestEntry.ended;
-    console.log(History)
-    console.log(SESH_Ended); 
+    // Iterate through each entry
+    for (const entry of data.data || []) {
+        if (entry.ended === false) {
+            console.log("Found an entry with 'ended': false:");
+            console.log(entry); // Print the entire entry
+            found = true;
+            SESH_Ended = false;
+            time_left = entry.time - entry.elapsed;
+            console.log(`Time left: ${time_left}`);
+            break; // Exit the loop after finding the first match
+        }
+    }
 
+    if (!found) {
+        console.log("All entries have 'ended': true or 'ended' key is not present");
+        SESH_Ended = true;
+    }
+    console.log(`1.1 running finished: ${SESH_Ended}`);
     return SESH_Ended;
-
     
-
-
 }
 
 
@@ -110,7 +121,7 @@ function updateStatusBarItem(status, paused) {
         Statusbar_startstop.command = 'arcade.Stop';
         Statusbar_startstop.text = "$(debug-stop) End Session";
         Statusbar_startstop.tooltip = "Click to end the arcade session";
-        timeleft(60);
+        timeleft(time_left);
         // 3.2.1) If the session is active, show the pause button
         if (paused) {
             Statusbar_pause.text = "$(debug-pause) Resume Session";
@@ -144,14 +155,13 @@ function timeleft(rem){
 }
 
 // @ts-ignor
-let isPaused;
 
 
 async function activate(context) {
 
 
     let SESH_Ended = Boolean(await IsRunning());
-    updateStatusBarItem(SESH_Ended);
+    updateStatusBarItem(SESH_Ended,);
 
     // WHEN START CLICKED
     let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
@@ -160,7 +170,7 @@ async function activate(context) {
             vscode.window.showInformationMessage('No session name entered!');
             return; // Exit if no command was entered
         }
-        await callAPI(`POST`, `start`, "somet");
+        await callAPI(`POST`, `start`, Sesh_Name);
         console.log(`SESH_Ended after start: ${false}`);
         updateStatusBarItem(false);
         showMessage(`${Sesh_Name}: Session Started!`);
@@ -181,7 +191,7 @@ async function activate(context) {
 
     let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
 
-        const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
+        //const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
         const paused = callAPI(`POST`, `pause`, null);
 
         // When Paused, set isPaused to true
