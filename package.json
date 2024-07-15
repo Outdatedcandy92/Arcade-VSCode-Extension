@@ -1,5 +1,5 @@
 {
-  "name": "arcade",
+  "name": "arcade-hackhour",
   "displayName": "Arcade Hackhour",
   "publisher": "Outdatedcandy92",
   "description": "Vscode Extension for interacting with hackhour api",
@@ -17,27 +17,27 @@
   "contributes": {
     "commands": [
       {
-        "command": "arcade.Time",
+        "command": "arcade-hackhour.Time",
         "title": "Arcade: Time"
       },
       {
-        "command": "arcade.Start",
+        "command": "arcade-hackhour.Start",
         "title": "Arcade: Start"
       },
       {
-        "command": "arcade.Stop",
+        "command": "arcade-hackhour.Stop",
         "title": "Arcade: Stop"
       },
       {
-        "command": "arcade.Pause",
+        "command": "arcade-hackhour.Pause",
         "title": "Arcade: Pause"
       },
       {
-        "command": "arcade.Test",
+        "command": "arcade-hackhour.Test",
         "title": "Arcade: Test"
       },
       {
-        "command": "arcade.Setup",
+        "command": "arcade-hackhour.Setup",
         "title": "Arcade: Setup"
       }
     ]

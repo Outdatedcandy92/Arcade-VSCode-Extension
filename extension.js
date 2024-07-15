@@ -113,12 +113,12 @@ function updateStatusBarItem(status, paused) {
     console.log(`2.2 status: ${status}`);
     if (status) {
         // 3.1) If the session is not active, show the start button
-        Statusbar_startstop.command = 'arcade.Start';
+        Statusbar_startstop.command = 'arcade-hackhour.Start';
         Statusbar_startstop.text = "$(debug-start) Start Session";
         Statusbar_startstop.tooltip = "Click to start an arcade session";
     } else {
         // 3.2) If the session is active, show the stop and time left
-        Statusbar_startstop.command = 'arcade.Stop';
+        Statusbar_startstop.command = 'arcade-hackhour.Stop';
         Statusbar_startstop.text = "$(debug-stop) End Session";
         Statusbar_startstop.tooltip = "Click to end the arcade session";
         timeleft(time_left);
@@ -164,7 +164,7 @@ async function activate(context) {
     updateStatusBarItem(SESH_Ended,);
 
     // WHEN START CLICKED
-    let StartCommand = vscode.commands.registerCommand('arcade.Start', async function () {
+    let StartCommand = vscode.commands.registerCommand('arcade-hackhour.Start', async function () {
         const Sesh_Name = await vscode.window.showInputBox({ prompt: 'Name of the session' });
         if (!Sesh_Name) {
             vscode.window.showInformationMessage('No session name entered!');
@@ -179,7 +179,7 @@ async function activate(context) {
     });
 
         // IF END (!not active)
-    let StopCommand = vscode.commands.registerCommand('arcade.Stop', async function () {
+    let StopCommand = vscode.commands.registerCommand('arcade-hackhour.Stop', async function () {
 
         callAPI(`POST`, `cancel`, null);
         console.log(`SESH_Ended after stop: ${true}`);
@@ -189,7 +189,7 @@ async function activate(context) {
          
     });
 
-    let PauseCommand = vscode.commands.registerCommand('arcade.Pause', async function () {
+    let PauseCommand = vscode.commands.registerCommand('arcade-hackhour.Pause', async function () {
 
         //const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
         const paused = callAPI(`POST`, `pause`, null);
@@ -207,7 +207,7 @@ async function activate(context) {
 
 
 
-    let Setup_f = vscode.commands.registerCommand('arcade.Setup', async () => {
+    let Setup_f = vscode.commands.registerCommand('arcade-hackhour.Setup', async () => {
         console.log(`Setup called`);
         const user_API = await vscode.window.showInputBox({ prompt: 'Enter APIKEY' });
         if (!user_API) {
@@ -233,7 +233,7 @@ async function activate(context) {
 
     
 
-    let Test = vscode.commands.registerCommand('arcade.Test', async () => {
+    let Test = vscode.commands.registerCommand('arcade-hackhour.Test', async () => {
         console.log(`Test called`);
         const url = `http://hackhour.hackclub.com/ping/`;
         const response = await fetch(url);
