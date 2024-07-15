@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:arcade-hackhour.setup"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -33,11 +34,11 @@
         "title": "Arcade: Pause"
       },
       {
-        "command": "Outdatedcandy92.arcade-hackhour.Test",
+        "command": "arcade-hackhour.Test",
         "title": "Arcade: Test"
       },
       {
-        "command": "Outdatedcandy92.arcade-hackhour.Setup",
+        "command": "arcade-hackhour.Setup",
         "title": "Arcade: Setup"
       }
     ]

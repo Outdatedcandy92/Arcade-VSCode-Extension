@@ -242,7 +242,7 @@ async function activate(context) {
 
 
 
-    let Setup_f = vscode.commands.registerCommand('Outdatedcandy92.arcade-hackhour.Setup', async () => {
+    let Setup = vscode.commands.registerCommand('arcade-hackhour.Setup', async () => {
         console.log(`Setup called`);
         const user_API = await vscode.window.showInputBox({ prompt: 'Enter APIKEY' });
         if (!user_API) {
@@ -268,7 +268,7 @@ async function activate(context) {
 
     
 
-    let Test = vscode.commands.registerCommand('Outdatedcandy92.arcade-hackhour.Test', async () => {
+    let Test = vscode.commands.registerCommand('arcade-hackhour.Test', async () => {
         console.log(`Test called`);
         const url = `http://hackhour.hackclub.com/ping/`;
         const response = await fetch(url);
@@ -286,7 +286,7 @@ async function activate(context) {
 
 
 
-    context.subscriptions.push(Statusbar_startstop, Setup_f, StartCommand, StopCommand, PauseCommand, Test);
+    context.subscriptions.push(Statusbar_startstop, Setup, StartCommand, StopCommand, PauseCommand, Test);
 }
 
 exports.activate = activate;
