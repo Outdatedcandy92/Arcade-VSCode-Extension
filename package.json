@@ -33,11 +33,11 @@
         "title": "Arcade: Pause"
       },
       {
-        "command": "arcade-hackhour.Test",
+        "command": "Outdatedcandy92.arcade-hackhour.Test",
         "title": "Arcade: Test"
       },
       {
-        "command": "arcade-hackhour.Setup",
+        "command": "Outdatedcandy92.arcade-hackhour.Setup",
         "title": "Arcade: Setup"
       }
     ]
