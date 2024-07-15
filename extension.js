@@ -225,6 +225,7 @@ async function activate(context) {
     
         // Check if config.js exists, if not it will be created with the content, if it does it will overwrite it with new content
         fs.writeFileSync(configPath, configContent, 'utf8');
+        showMessage('Configurations saved successfully!');
 
         });
 
