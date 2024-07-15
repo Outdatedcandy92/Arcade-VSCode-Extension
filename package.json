@@ -3,7 +3,7 @@
   "displayName": "Arcade Hackhour",
   "publisher": "Outdatedcandy92",
   "description": "Vscode Extension for interacting with hackhour api",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -12,34 +12,34 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onCommand:arcade-hackhour.Setup",
-    "onCommand:arcade-hackhour.Test"
+    "onCommand:arcade-hackhour.setup",
+    "onCommand:arcade-hackhour.test"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "arcade-hackhour.Time",
+        "command": "arcade-hackhour.time",
         "title": "Arcade: Time"
       },
       {
-        "command": "arcade-hackhour.Start",
+        "command": "arcade-hackhour.start",
         "title": "Arcade: Start"
       },
       {
-        "command": "arcade-hackhour.Stop",
+        "command": "arcade-hackhour.stop",
         "title": "Arcade: Stop"
       },
       {
-        "command": "arcade-hackhour.Pause",
+        "command": "arcade-hackhour.pause",
         "title": "Arcade: Pause"
       },
       {
-        "command": "arcade-hackhour.Test",
+        "command": "arcade-hackhour.test",
         "title": "Arcade: Test"
       },
       {
-        "command": "arcade-hackhour.Setup",
+        "command": "arcade-hackhour.setup",
         "title": "Arcade: Setup"
       }
     ]
