@@ -2,7 +2,7 @@ const vscode = require('vscode');
 
 const fs = require('fs');
 const path = require('path');
-
+require('dotenv').config();
 // extension.js
 let isPaused;
 let SESH_Ended;
@@ -11,17 +11,17 @@ let apikey, slackId;
 
 function IsConfig() {
  
-    const configPath = path.join(__dirname, 'config.js');
-    const configExists = fs.existsSync(configPath);
-    if (configExists) {
-        console.log('config.js exists');
-        const config = require('./config.js');
-        apikey = config.apikey;
-        slackId = config.slackId;
+    const envPath = path.join(__dirname, '.env');
+    const envExists = fs.existsSync(envPath);
+    if (envExists) {
+        console.log('.env file exists');
+        // Directly use process.env to access variables
+        apikey = process.env.API_KEY;
+        slackId = process.env.SLACK_ID;
         
         return true;
     } else {
-        console.log('config.js does not exist');
+        console.log('.env file does not exist');
         return false;
     }
 }
