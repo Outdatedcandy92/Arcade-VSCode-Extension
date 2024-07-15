@@ -4,10 +4,31 @@ const fs = require('fs');
 const path = require('path');
 
 // extension.js
-const { apikey, slackId } = require('./config.js');
 let isPaused;
 let SESH_Ended;
 let time_left;
+let apikey, slackId;
+
+function IsConfig() {
+ 
+    const configPath = path.join(__dirname, 'config.js');
+    const configExists = fs.existsSync(configPath);
+    if (configExists) {
+        console.log('config.js exists');
+        const config = require('./config.js');
+        apikey = config.apikey;
+        slackId = config.slackId;
+        
+        return true;
+    } else {
+        console.log('config.js does not exist');
+        return false;
+    }
+}
+
+//IsConfig();
+
+//CHECK IF CONFIG EXISTS
 
 function showMessage(message){
     vscode.window.withProgress(
@@ -119,14 +140,18 @@ function updateStatusBarItem(status, paused) {
     } else {
         // 3.2) If the session is active, show the stop and time left
         Statusbar_startstop.command = 'arcade-hackhour.Stop';
-        Statusbar_startstop.text = "$(debug-stop) End Session";
+        Statusbar_startstop.text = "$(debug-stop)";
         Statusbar_startstop.tooltip = "Click to end the arcade session";
         timeleft(time_left);
         // 3.2.1) If the session is active, show the pause button
         if (paused) {
-            Statusbar_pause.text = "$(debug-pause) Resume Session";
+            Statusbar_pause.text = "$(debug-restart)";
+            Statusbar_pause.command = "arcade-hackhour.Pause";
+            Statusbar_pause.tooltip = "Click to pause/resume the arcade session";
         } else { // 3.2.2) If the session is active, show the resume button
-            Statusbar_pause.text = "$(debug-pause) Pause Session";
+            Statusbar_pause.text = "$(debug-pause)";
+            Statusbar_pause.command = "arcade-hackhour.Pause";
+            Statusbar_pause.tooltip = "Click to pause/resume the arcade session";
         }
         Statusbar_pause.show();
         
@@ -157,11 +182,21 @@ function timeleft(rem){
 // @ts-ignor
 
 
+
+
+
+
+
 async function activate(context) {
 
+    
 
-    let SESH_Ended = Boolean(await IsRunning());
-    updateStatusBarItem(SESH_Ended,);
+    if (IsConfig()) {
+        let SESH_Ended = Boolean(await IsRunning());
+        updateStatusBarItem(SESH_Ended,);
+    } else {
+        showMessage('Please setup the extension first! (Arcade: Setup)');
+    }
 
     // WHEN START CLICKED
     let StartCommand = vscode.commands.registerCommand('arcade-hackhour.Start', async function () {
@@ -237,8 +272,7 @@ async function activate(context) {
         console.log(`Test called`);
         const url = `http://hackhour.hackclub.com/ping/`;
         const response = await fetch(url);
-        const data = await response.json();
-        console.log(data);
+        console.log(response);
 
     
         
