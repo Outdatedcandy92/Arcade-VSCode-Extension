@@ -1,9 +1,9 @@
 {
-  "name": "arcade-hackhour",
+  "name": "arcade",
   "displayName": "Arcade Hackhour",
   "publisher": "Outdatedcandy92",
   "description": "Vscode Extension for interacting with hackhour api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.91.0"
   },
