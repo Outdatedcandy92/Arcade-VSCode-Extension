@@ -12,7 +12,8 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onCommand:arcade-hackhour.setup"
+    "onCommand:arcade-hackhour.Setup",
+    "onCommand:arcade-hackhour.Test"
   ],
   "main": "./extension.js",
   "contributes": {
