@@ -10,8 +10,8 @@ let apikey, slackId;
 function IsConfig(context) { // Ensure context is passed correctly
     console.log("Checking configuration...");
 
-    apikey = context.globalState.get('apikey');
-    slackId = context.globalState.get('slackId');
+    apikey = context.globalState.get('arcade-hackhour.apikey');
+    slackId = context.globalState.get('arcade-hackhour.slackId');
 
     console.log(`Retrieved API Key: ${apikey}`);
     console.log(`Retrieved Slack ID: ${slackId}`);
@@ -248,7 +248,7 @@ async function activate(context) {
             vscode.window.showInformationMessage('API Key not provided');
             return; // Exit if no API key was entered
         }
-        await context.globalState.update('apikey', user_API);
+        await context.globalState.update('arcade-hackhour.apikey', user_API);
         console.log(`API Key saved: ${user_API}`); // Debugging statement
         vscode.window.showInformationMessage('API Key saved!');
     
@@ -257,7 +257,7 @@ async function activate(context) {
             vscode.window.showInformationMessage('Slack ID not provided');
             return; // Exit if no Slack ID was entered
         }
-        await context.globalState.update('slackId', user_Slack);
+        await context.globalState.update('arcade-hackhour.slackId', user_Slack);
         console.log(`Slack ID saved: ${user_Slack}`); // Debugging statement
         vscode.window.showInformationMessage('Slack ID saved!');
     });
