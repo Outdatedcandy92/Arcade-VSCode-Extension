@@ -7,14 +7,21 @@ let SESH_Ended;
 let time_left;
 let apikey, slackId;
 
-function IsConfig() {
-    if (vscode.workspace.getConfiguration().get('arcade-hackhour.apikey') && vscode.workspace.getConfiguration().get('arcade-hackhour.slackid')) {
-        apikey = vscode.workspace.getConfiguration().get('arcade-hackhour.apikey');
-        slackId = vscode.workspace.getConfiguration().get('arcade-hackhour.slackid');
-        console.log(`API Key and Slack available in global state.`);
+function IsConfig(context) { // Ensure context is passed correctly
+    console.log("Checking configuration...");
+
+    apikey = context.globalState.get('arcade-hackhour.apikey');
+    slackId = context.globalState.get('arcade-hackhour.slackid');
+
+    console.log(`Retrieved API Key: ${apikey}`);
+    console.log(`Retrieved Slack ID: ${slackId}`);
+
+    if (apikey && slackId) {
+        console.log(`API Key and Slack ID available in global state.`);
+        return true;
     } else {
         console.log("API Key and Slack ID not found in global state.");
-        showMessage('Please setup the extension first! (Arcade: Setup)');
+        return false;
     }
 }
 
@@ -183,7 +190,7 @@ async function activate(context) {
 
     
 
-    if (IsConfig()) {
+    if (IsConfig(context)) {
         let SESH_Ended = Boolean(await IsRunning());
         updateStatusBarItem(SESH_Ended,);
     } else {
@@ -238,34 +245,36 @@ async function activate(context) {
         console.log(`Setup called`);
         const user_API = await vscode.window.showInputBox({ prompt: 'Enter APIKEY' });
         if (!user_API) {
-            vscode.window.showInformationMessage('Empty Title');
-            return; // Exit if no command was entered
+            vscode.window.showInformationMessage('API Key not provided');
+            return; // Exit if no API key was entered
         }
-        context.globalState.update('apiKey', user_API);
-        showMessage('API Key saved!');
+        await context.globalState.update('apikey', user_API);
+        console.log(`API Key saved: ${user_API}`); // Debugging statement
+        vscode.window.showInformationMessage('API Key saved!');
+    
         const user_Slack = await vscode.window.showInputBox({ prompt: 'Enter Slack ID' });
         if (!user_Slack) {
-            vscode.window.showInformationMessage('Empty Title');
-            return; // Exit if no command was entered
+            vscode.window.showInformationMessage('Slack ID not provided');
+            return; // Exit if no Slack ID was entered
         }
-        context.globalState.update('slackId', user_Slack);
-        showMessage('Slack ID saved!');
-
-        });
-
-
-
+        await context.globalState.update('slackId', user_Slack);
+        console.log(`Slack ID saved: ${user_Slack}`); // Debugging statement
+        vscode.window.showInformationMessage('Slack ID saved!');
+    });
     
-
+    // Debugging retrieval
     let Test = vscode.commands.registerCommand('arcade-hackhour.test', async () => {
         console.log(`Test called`);
-        const url = `http://hackhour.hackclub.com/ping/`;
-        const response = await fetch(url);
-        console.log(response);
-
-    
-        
-        });
+        const apikey = context.globalState.get('apikey');
+        const slackId = context.globalState.get('slackId');
+        console.log(`Retrieved API Key: ${apikey}`);
+        console.log(`Retrieved Slack ID: ${slackId}`);
+        if (apikey && slackId) {
+            vscode.window.showInformationMessage(`API Key: ${apikey}, Slack ID: ${slackId}`);
+        } else {
+            vscode.window.showInformationMessage('API Key or Slack ID not found.');
+        }
+    });
 
 
 
