@@ -3,6 +3,13 @@
 
 ## Added
 
-- v0.1.6 IT WORKS
-- v0.01-0.1.5 Inital + Bug Fixes
 
+### v0.2.0  
+
+- Extension Works
+
+
+#### v0.01 - v0.1.9
+
+- Extension had issues with storing variabels
+- Caused errors after running setup
