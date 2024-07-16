@@ -1,8 +1,6 @@
 const vscode = require('vscode');
 
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config();
+
 // extension.js
 let isPaused;
 let SESH_Ended;
@@ -10,19 +8,13 @@ let time_left;
 let apikey, slackId;
 
 function IsConfig() {
- 
-    const envPath = path.join(__dirname, '.env');
-    const envExists = fs.existsSync(envPath);
-    if (envExists) {
-        console.log('.env file exists');
-        // Directly use process.env to access variables
-        apikey = process.env.API_KEY;
-        slackId = process.env.SLACK_ID;
-        
-        return true;
+    if (vscode.workspace.getConfiguration().get('arcade-hackhour.apikey') && vscode.workspace.getConfiguration().get('arcade-hackhour.slackid')) {
+        apikey = vscode.workspace.getConfiguration().get('arcade-hackhour.apikey');
+        slackId = vscode.workspace.getConfiguration().get('arcade-hackhour.slackid');
+        console.log(`API Key and Slack available in global state.`);
     } else {
-        console.log('.env file does not exist');
-        return false;
+        console.log("API Key and Slack ID not found in global state.");
+        showMessage('Please setup the extension first! (Arcade: Setup)');
     }
 }
 
@@ -249,18 +241,15 @@ async function activate(context) {
             vscode.window.showInformationMessage('Empty Title');
             return; // Exit if no command was entered
         }
+        context.globalState.update('apiKey', user_API);
+        showMessage('API Key saved!');
         const user_Slack = await vscode.window.showInputBox({ prompt: 'Enter Slack ID' });
         if (!user_Slack) {
             vscode.window.showInformationMessage('Empty Title');
             return; // Exit if no command was entered
         }
-        
-        const configPath = path.join(__dirname, 'config.js');
-        const configContent = `const apikey = '${user_API}';\nconst slackId = '${user_Slack}';\nmodule.exports = { apikey, slackId };`;
-    
-        // Check if config.js exists, if not it will be created with the content, if it does it will overwrite it with new content
-        fs.writeFileSync(configPath, configContent, 'utf8');
-        showMessage('Configurations saved successfully!');
+        context.globalState.update('slackId', user_Slack);
+        showMessage('Slack ID saved!');
 
         });
 
