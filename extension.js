@@ -1,5 +1,13 @@
 const vscode = require('vscode');
 
+async function fetchData() {
+    const nodeFetchModule = await import('node-fetch');
+    const fetch = nodeFetchModule.default;
+    // You can now use fetch() here
+  }
+  
+  // Call the function
+  fetchData().catch(console.error);
 
 // extension.js
 let isPaused;
@@ -52,9 +60,6 @@ function showMessage(message){
 
 
 async function callAPI(method_a , destination, body_content) {
-    
-    const nodeFetchModule = await import('node-fetch');
-    const fetch = nodeFetchModule.default;
     console.log(`CallAPI called`);
     const url = `http://hackhour.hackclub.com/api/${destination}/${slackId}`;
     console.log(`URL: ${url}`);
@@ -265,8 +270,8 @@ async function activate(context) {
     // Debugging retrieval
     let Test = vscode.commands.registerCommand('arcade-hackhour.test', async () => {
         console.log(`Test called`);
-        apikey = context.globalState.get('apikey');
-        slackId = context.globalState.get('slackId');
+        apikey = context.globalState.get('arcade-hackhour.apikey');
+        slackId = context.globalState.get('arcade-hackhour.slackId');
         console.log(`Retrieved API Key: ${apikey}`);
         console.log(`Retrieved Slack ID: ${slackId}`);
         if (apikey && slackId) {
