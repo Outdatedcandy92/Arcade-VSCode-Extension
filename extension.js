@@ -10,8 +10,8 @@ let apikey, slackId;
 function IsConfig(context) { // Ensure context is passed correctly
     console.log("Checking configuration...");
 
-    apikey = context.globalState.get('arcade-hackhour.apikey');
-    slackId = context.globalState.get('arcade-hackhour.slackid');
+    apikey = context.globalState.get('apikey');
+    slackId = context.globalState.get('slackId');
 
     console.log(`Retrieved API Key: ${apikey}`);
     console.log(`Retrieved Slack ID: ${slackId}`);
@@ -265,8 +265,8 @@ async function activate(context) {
     // Debugging retrieval
     let Test = vscode.commands.registerCommand('arcade-hackhour.test', async () => {
         console.log(`Test called`);
-        const apikey = context.globalState.get('apikey');
-        const slackId = context.globalState.get('slackId');
+        apikey = context.globalState.get('apikey');
+        slackId = context.globalState.get('slackId');
         console.log(`Retrieved API Key: ${apikey}`);
         console.log(`Retrieved Slack ID: ${slackId}`);
         if (apikey && slackId) {

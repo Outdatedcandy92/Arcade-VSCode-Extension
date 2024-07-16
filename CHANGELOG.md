@@ -3,8 +3,6 @@
 
 ## Added
 
-- v0.01-0.1.4 Inital + Bug Fixes
+- v0.1.6 IT WORKS
+- v0.01-0.1.5 Inital + Bug Fixes
 
-## [Unreleased]
-
-- Initial release
