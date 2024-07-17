@@ -128,9 +128,9 @@ async function IsRunning() {
 }
 
 
-let Statusbar_startstop = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let Statusbar_startstop = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98);
 let Statusbar_time= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let Statusbar_pause = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
 
 //2) IF SESSION IS ACTIVE, SHOW THE PAUSE BUTTON ELSE SHOW THE START BUTTON
 function updateStatusBarItem(status, paused) {
@@ -149,13 +149,13 @@ function updateStatusBarItem(status, paused) {
         timeleft(time_left);
         // 3.2.1) If the session is active, show the pause button
         if (paused) {
-            Statusbar_pause.text = "$(debug-restart)";
+            Statusbar_pause.text = "$(debug-continue)";
             Statusbar_pause.command = "arcade-hackhour.pause";
-            Statusbar_pause.tooltip = "Click to pause/resume the arcade session";
+            Statusbar_pause.tooltip = "Click to resume the arcade session";
         } else { // 3.2.2) If the session is active, show the resume button
             Statusbar_pause.text = "$(debug-pause)";
             Statusbar_pause.command = "arcade-hackhour.pause";
-            Statusbar_pause.tooltip = "Click to pause/resume the arcade session";
+            Statusbar_pause.tooltip = "Click to pause the arcade session";
         }
         Statusbar_pause.show();
         
@@ -186,6 +186,22 @@ function timeleft(rem){
 // @ts-ignor
 
 
+function clearCredentials(context) {
+    // Assuming 'context' is the global storage context provided by the extension environment
+    // Replace 'apiKey' and 'slackId' with the actual keys used in your global storage
+  
+    // Clear API key from global storage
+    if (context.globalState.get('apiKey')) {
+      context.globalState.update('apiKey', undefined);
+    }
+  
+    // Clear Slack ID from global storage
+    if (context.globalState.get('slackId')) {
+      context.globalState.update('slackId', undefined);
+    }
+  
+    console.log('Credentials cleared from global storage.');
+  }
 
 
 
@@ -197,7 +213,7 @@ async function activate(context) {
 
     if (IsConfig(context)) {
         let SESH_Ended = Boolean(await IsRunning());
-        updateStatusBarItem(SESH_Ended,);
+        updateStatusBarItem(SESH_Ended);
     } else {
         showMessage('Please setup the extension first! (Arcade: Setup)');
     }
@@ -211,6 +227,7 @@ async function activate(context) {
         }
         await callAPI(`POST`, `start`, Sesh_Name);
         console.log(`SESH_Ended after start: ${false}`);
+        time_left = 60;
         updateStatusBarItem(false);
         showMessage(`${Sesh_Name}: Session Started!`);
         
@@ -231,14 +248,15 @@ async function activate(context) {
     let PauseCommand = vscode.commands.registerCommand('arcade-hackhour.pause', async function () {
 
         //const StartURL = `https://hackhour.hackclub.com/api/pause/${slackId}`;
-        const paused = callAPI(`POST`, `pause`, null);
+        const data = await callAPI(`POST`, `pause`, null);
 
         // When Paused, set isPaused to true
         //when ispaused is true, show the resume button
         //when ispaused is false, show the pause button
 
         // @ts-ignore
-        isPaused = paused.data.paused;
+        isPaused = data.data.paused;
+        console.log(`Paused: ${isPaused}`);
         updateStatusBarItem(false, isPaused);
 
     });
@@ -248,6 +266,7 @@ async function activate(context) {
 
     let Setup = vscode.commands.registerCommand('arcade-hackhour.setup', async () => {
         console.log(`Setup called`);
+        clearCredentials(context);
         const user_API = await vscode.window.showInputBox({ prompt: 'Enter APIKEY' });
         if (!user_API) {
             vscode.window.showInformationMessage('API Key not provided');
