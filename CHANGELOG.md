@@ -3,6 +3,10 @@
 
 ## Added
 
+
+## V0.2.3
+- fixed a issue where the timer won't go away after session end.
+
 ### v0.2.2
 - Fixed the pause/resume icon problem
 - Fixed setup function. Can now change values

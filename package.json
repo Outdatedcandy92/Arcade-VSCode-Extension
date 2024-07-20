@@ -2,8 +2,8 @@
   "name": "arcade-hackhour",
   "displayName": "Arcade Hackhour",
   "publisher": "Outdatedcandy92",
-  "description": "Vscode Extension for interacting with hackhour api",
-  "version": "0.2.2",
+  "description": "Streamline your Hackhour sessions directly from VSCode! With this extension, you can start, stop, pause, and set time left on your Hackhour Arcade sessions effortlessly using the hackhour API. Maximize your productivity without leaving your coding environment.",
+  "version": "0.2.3",
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -16,9 +16,7 @@
     "url": "https://github.com/Outdatedcandy92/Arcade-VSCode-Extension"
   },
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:arcade-hackhour.setup",
-    "onCommand:arcade-hackhour.test"
+    "onStartupFinished"
   ],
   "main": "./extension.js",
   "contributes": {

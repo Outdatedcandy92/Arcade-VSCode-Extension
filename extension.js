@@ -179,6 +179,7 @@ function timeleft(rem){
             console.log('Timer ended');
             showMessage('Congratulations! You have completed your session!');
             updateStatusBarItem(true);
+            Statusbar_time.hide(); // Optionally hide the timer from the status bar
         }
     }, 60000); // 60000 milliseconds = 1 minute
 }
